@@ -70,17 +70,16 @@ local module_from_path = function(rust_file, cargo_toml)
   if toml.lib ~= nil then
     relative_path = vim.fn.substitute(relative_path, toml.lib.path, '', 'g')
   else
-    relative_path = vim.fn.substitute(relative_path, 'src/main.rs', '', 'g')
-    relative_path = vim.fn.substitute(relative_path, 'src/lib.rs', '', 'g')
+    relative_path = vim.fn.substitute(relative_path, 'src/', '', 'g')
+    relative_path = vim.fn.substitute(relative_path, 'main.rs', '', 'g')
+    relative_path = vim.fn.substitute(relative_path, 'lib.rs', '', 'g')
   end
 
-  if relative_path == '/' then
-    return ''
-  end
-
-  relative_path = relative_path:gsub('/mod.rs', '')
+  relative_path = relative_path:gsub('mod.rs', '')
   relative_path = relative_path:gsub('.rs', '')
+  relative_path = relative_path:gsub('^/', '')
   local module_name = relative_path:gsub('/', '::')
+
   return module_name
 end
 
