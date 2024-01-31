@@ -10,7 +10,7 @@ local query_str = [[
     )
     .
     (function_item name: (identifier) @test.name) @test.definition
-    (#any-of? @macro_name "tokio::test" "test")
+    (#match? @macro_name ".*test$")
   )
   (
     (function_item name: (identifier) @main_name)
@@ -119,7 +119,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
 end
 
 local function get_bin_arg(cargo_toml, file)
-  local text = io.open(cargo_toml):read("*a")
+  local text = io.open(cargo_toml):read('*a')
   local toml = require('rust-quick-tests.toml').parse(text)
 
   local bins = toml.bin
@@ -134,7 +134,6 @@ local function get_bin_arg(cargo_toml, file)
   end
 
   return nil
-
 end
 
 -- create bin runnable
