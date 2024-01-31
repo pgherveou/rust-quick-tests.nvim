@@ -1,4 +1,4 @@
--- copied from rustaceanvim/lua/hover_actions.lua
+-- Adapted from https://github.com/mrcjkb/rustaceanvim
 local lsp_util = vim.lsp.util
 local ts = require('rust-quick-tests.treesitter')
 local M = {}

@@ -1,4 +1,4 @@
--- copied from lua/rustaceanvim/ui.lua
+-- Pulled from https://github.com/mrcjkb/rustaceanvim
 local M = {}
 
 ---@param bufnr integer | nil

@@ -1,3 +1,4 @@
+-- Adapted from https://github.com/mrcjkb/rustaceanvim
 ---@type integer | nil
 local latest_buf_id = nil
 
