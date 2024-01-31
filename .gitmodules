@@ -1,0 +1,3 @@
+[submodule "lua/rust-quick-tests/lua-toml"]
+	path = lua/rust-quick-tests/lua-toml
+	url = https://github.com/jonstoler/lua-toml
