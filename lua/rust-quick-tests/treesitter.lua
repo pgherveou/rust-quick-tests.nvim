@@ -49,6 +49,14 @@ local get_cargo_toml = function(file)
   return nil
 end
 
+-- parse toml file
+---@param cargo_toml string
+---@return table
+local function parse_toml(cargo_toml)
+  local text = io.open(cargo_toml):read('*a')
+  return require('rust-quick-tests.toml').parse(text)
+end
+
 -- return the module name given a rust src file and a cargo toml file
 ---@param rust_file string
 ---@param cargo_toml string
@@ -57,8 +65,16 @@ local module_from_path = function(rust_file, cargo_toml)
   local dir = vim.fn.fnamemodify(cargo_toml, ':h')
 
   local relative_path = vim.fn.substitute(rust_file, dir, '', 'g')
-  relative_path = vim.fn.substitute(relative_path, '/src/', '', 'g')
-  if relative_path == 'main.rs' or relative_path == 'lib.rs' then
+
+  local toml = parse_toml(cargo_toml)
+  if toml.lib ~= nil then
+    relative_path = vim.fn.substitute(relative_path, toml.lib.path, '', 'g')
+  else
+    relative_path = vim.fn.substitute(relative_path, 'src/main.rs', '', 'g')
+    relative_path = vim.fn.substitute(relative_path, 'src/lib.rs', '', 'g')
+  end
+
+  if relative_path == '/' then
     return ''
   end
 
@@ -83,7 +99,6 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   end
 
   local module_prefix = module_from_path(file, cargo_toml)
-
   local full_test_name = table.concat(names) .. test_name
   if module_prefix ~= '' then
     full_test_name = module_prefix .. '::' .. full_test_name
@@ -123,8 +138,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
 end
 
 local function get_bin_arg(cargo_toml, file)
-  local text = io.open(cargo_toml):read('*a')
-  local toml = require('rust-quick-tests.toml').parse(text)
+  local toml = parse_toml(cargo_toml)
 
   local bins = toml.bin
   if bins == nil then
