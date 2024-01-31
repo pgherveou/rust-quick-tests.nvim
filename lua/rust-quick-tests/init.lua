@@ -1,8 +1,13 @@
-local M = {}
-function M.setup()
-  vim.keymap.set('n', 'K', function()
+local M = {
+  hover_actions = function()
     require('rust-quick-tests.hover_actions').hover_actions()
-  end, { noremap = true, silent = true })
-end
+  end,
+  replay_last = function()
+    require('rust-quick-tests.hover_actions').replay_last()
+  end,
+}
+
+-- noop for now
+function M.setup() end
 
 return M

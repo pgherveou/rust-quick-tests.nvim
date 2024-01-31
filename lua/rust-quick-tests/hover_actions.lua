@@ -1,6 +1,6 @@
 -- copied from rustaceanvim/lua/hover_actions.lua
 local lsp_util = vim.lsp.util
-local find_rust_tests = require('rust-quick-tests.find_rust_tests')
+local ts = require('rust-quick-tests.treesitter')
 local M = {}
 
 ---@class HoverActionsState
@@ -16,8 +16,10 @@ local function close_hover()
   ui.close_win(_state.winnr)
 end
 
-local function execute_command(action)
-  require('rust-quick-tests.termopen').execute_command(action)
+local last_cmd = nil
+local function execute_command(cmd)
+  last_cmd = cmd
+  require('rust-quick-tests.termopen').execute_command(cmd)
 end
 
 -- run the command under the cursor, if the thing under the cursor is not the
@@ -129,8 +131,14 @@ end
 function M.hover_actions()
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local results = find_rust_tests(bufnr, cursor)
+  local results = ts.find_runnable(bufnr, cursor)
   M.handler(nil, results)
+end
+
+function M.replay_last()
+  if last_cmd ~= nil then
+    execute_command(last_cmd)
+  end
 end
 
 return M
