@@ -7,11 +7,28 @@ local M = {
   end,
 }
 
-vim.api.nvim_create_user_command('RustMainArgs', function(opts)
-  local args = table.concat(opts.fargs, ' ')
-  require('rust-quick-tests.treesitter').extra_args = args
+vim.api.nvim_create_user_command('RustQuick', function(opts)
+  local ts = require('rust-quick-tests.treesitter')
+  local cmd = table.remove(opts.fargs, 1)
+
+  if cmd == 'args' then
+    local args = table.concat(opts.fargs, ' ')
+    ts.extra_args = args
+  elseif cmd == 'release' then
+    ts.release = true
+  elseif cmd == 'dev' then
+    ts.release = false
+  else
+    vim.notify('Unknown command: ' .. cmd, vim.log.levels.ERROR)
+  end
 end, {
   nargs = '*',
+  complete = function(_, cmdline)
+    if #vim.split(cmdline, ' ') > 2 then
+      return {}
+    end
+    return { 'args', 'release' }
+  end,
 })
 
 -- noop for now

@@ -1,5 +1,6 @@
 local M = {
   extra_args = '',
+  release = false,
 }
 
 -- query to parse test names from a file
@@ -103,8 +104,17 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     full_test_name = module_prefix .. '::' .. full_test_name
   end
 
-  local command =
-    string.format('cargo test --manifest-path %s --all-features %s -- --exact --nocapture', cargo_toml, full_test_name)
+  local releaseFlag = ''
+  if M.release then
+    releaseFlag = '--release'
+  end
+
+  local command = string.format(
+    'cargo test %s --manifest-path %s --all-features %s -- --exact --nocapture',
+    releaseFlag,
+    cargo_toml,
+    full_test_name
+  )
 
   local runCommand = {
     id = 'run_test',
@@ -168,6 +178,10 @@ local function make_bin_runnable(bufnr)
     command = command .. ' --bin ' .. bin_arg
   end
 
+  if M.release then
+    command = command .. ' --release'
+  end
+
   if M.extra_args ~= '' then
     command = command .. ' ' .. M.extra_args
   end
@@ -188,7 +202,7 @@ local function make_bin_runnable(bufnr)
     },
     contents = {
       kind = 'markdown',
-      value = '```rust\nfn main()\n```\nUse `RustMainArgs` command to pass args',
+      value = '```rust\nfn main()\n```\nUse `:RustQuick` to customize command',
     },
   }
 end
