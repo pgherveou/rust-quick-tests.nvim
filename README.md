@@ -4,6 +4,8 @@ A simple Neovim plugin that mimics the `Hover action` from [rustaceanvim](https:
 
 This plugin uses `Treesitter` for parsing the tests instead of `rust-analyzer`. While less accurate, this approach provides instantaneous responses compared to using `rust-analyzer`, which can be a time saver in large Rust project.
 
+![Screenshot 2024-02-01 at 15 04 51](https://github.com/pgherveou/rust-quick-tests.nvim/assets/521091/fd7f28b3-03f3-40f5-bb08-fdd08dfe76c0)
+
 # Installation
 
 Example using [`lazy.nvim`](https://github.com/folke/lazy.nvim):
