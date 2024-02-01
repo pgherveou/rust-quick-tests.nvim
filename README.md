@@ -12,6 +12,8 @@ Example using [`lazy.nvim`](https://github.com/folke/lazy.nvim):
 return {
   'pgherveou/rust-quick-tests.nvim',
   ft = { 'rust' },
+  dependencies = { 'nvim-lua/plenary.nvim' },
+  config = true,
   keys = {
     {
       'K',
@@ -30,3 +32,15 @@ return {
   },
 }
 ```
+
+# Commands
+
+## RustQuick
+
+Set quick test options.
+
+Usage:
+
+- RustQuick args <args> - Set extra args to pass to cargo run
+- RustQuick release - Run tests in release mode
+- RustQuick dev - Run tests in dev mode

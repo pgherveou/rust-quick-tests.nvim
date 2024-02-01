@@ -1,7 +1,7 @@
-local M = {
-  extra_args = '',
-  release = false,
-}
+local M = {}
+
+local Path = require('plenary.path')
+local config = require('rust-quick-tests.config')
 
 -- query to parse test names from a file
 local query_str = [[
@@ -41,7 +41,7 @@ local get_cargo_toml = function(file)
   local path = vim.fn.fnamemodify(file, ':h')
   while path ~= '/' do
     local cargo_toml = path .. '/Cargo.toml'
-    if vim.fn.filereadable(cargo_toml) == 1 then
+    if Path:new(cargo_toml):exists() then
       return cargo_toml
     end
     path = vim.fn.fnamemodify(path, ':h')
@@ -54,7 +54,7 @@ end
 ---@param cargo_toml string
 ---@return table
 local function parse_toml(cargo_toml)
-  local text = io.open(cargo_toml):read('*a')
+  local text = Path:new(cargo_toml):read()
   return require('rust-quick-tests.toml').parse(text)
 end
 
@@ -105,7 +105,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   end
 
   local releaseFlag = ''
-  if M.release then
+  if config.cwd_config().release then
     releaseFlag = '--release'
   end
 
@@ -178,12 +178,14 @@ local function make_bin_runnable(bufnr)
     command = command .. ' --bin ' .. bin_arg
   end
 
-  if M.release then
+  local cfg = config.cwd_config()
+
+  if cfg.release then
     command = command .. ' --release'
   end
 
-  if M.extra_args ~= '' then
-    command = command .. ' ' .. M.extra_args
+  if cfg.extra_args ~= '' then
+    command = command .. ' ' .. cfg.extra_args
   end
 
   local runCommand = {
