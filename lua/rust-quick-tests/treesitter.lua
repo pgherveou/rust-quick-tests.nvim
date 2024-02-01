@@ -61,13 +61,13 @@ end
 -- return the module name given a rust src file and a cargo toml file
 ---@param rust_file string
 ---@param cargo_toml string
+---@param toml table
 ---@return string
-local module_from_path = function(rust_file, cargo_toml)
+local module_from_path = function(rust_file, cargo_toml, toml)
   local dir = vim.fn.fnamemodify(cargo_toml, ':h')
 
   local relative_path = vim.fn.substitute(rust_file, dir, '', 'g')
 
-  local toml = parse_toml(cargo_toml)
   if toml.lib ~= nil then
     relative_path = vim.fn.substitute(relative_path, toml.lib.path, '', 'g')
   else
@@ -98,7 +98,8 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     return {}
   end
 
-  local module_prefix = module_from_path(file, cargo_toml)
+  local toml = parse_toml(cargo_toml)
+  local module_prefix = module_from_path(file, cargo_toml, toml)
   local full_test_name = table.concat(names) .. test_name
   if module_prefix ~= '' then
     full_test_name = module_prefix .. '::' .. full_test_name
@@ -141,14 +142,19 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     },
     contents = {
       kind = 'markdown',
-      value = '\n```rust\n' .. full_test_name .. '\n```\n\n```rust\nfn ' .. test_name .. '()\n```',
+      value = string.format(
+        '# %s\n```rust\nfn %s()\n```\n\n> Use `:RustQuick` to customize command',
+        toml.package.name,
+        full_test_name
+      ),
     },
   }
 end
 
-local function get_bin_arg(cargo_toml, file)
-  local toml = parse_toml(cargo_toml)
-
+-- get bin arg from Cargo.toml
+--@param toml table
+--@param file string
+local function get_bin_arg(toml, file)
   local bins = toml.bin
   if bins == nil then
     return nil
@@ -172,7 +178,8 @@ local function make_bin_runnable(bufnr)
     return {}
   end
 
-  local bin_arg = get_bin_arg(cargo_toml, file)
+  local toml = parse_toml(cargo_toml)
+  local bin_arg = get_bin_arg(toml, file)
   local command = string.format('cargo run --manifest-path %s', cargo_toml)
   if bin_arg ~= nil then
     command = command .. ' --bin ' .. bin_arg
@@ -204,7 +211,10 @@ local function make_bin_runnable(bufnr)
     },
     contents = {
       kind = 'markdown',
-      value = '```rust\nfn main()\n```\nUse `:RustQuick` to customize command',
+      value = string.format(
+        '# %s\n```rust\nfn main()\n```\n\n> Use `:RustQuick` to customize command',
+        toml.package.name
+      ),
     },
   }
 end
