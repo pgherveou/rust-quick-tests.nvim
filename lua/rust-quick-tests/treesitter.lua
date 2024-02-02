@@ -110,11 +110,11 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
 
   local releaseFlag = ''
   if config.cwd_config().release then
-    releaseFlag = '--release'
+    releaseFlag = '--release '
   end
 
   local command = string.format(
-    'cargo test %s --manifest-path %s --all-features %s -- --exact --nocapture',
+    'cargo test %s--manifest-path %s --all-features %s -- --exact --nocapture',
     releaseFlag,
     cargo_toml:make_relative(),
     full_test_name
