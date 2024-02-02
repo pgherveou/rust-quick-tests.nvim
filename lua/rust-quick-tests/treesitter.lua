@@ -26,6 +26,9 @@ local query_str = [[
 ---@class TSNode
 local _TSNode = {}
 
+---@class Path
+local _Path = {}
+
 ---@class NamespaceInfo
 local _state = {
   ---@type string
@@ -35,38 +38,32 @@ local _state = {
 }
 
 -- Get the path to the nearest Cargo.toml file
----@param file string
----@return string | nil
+---@param file Path
+---@return Path | nil
 local get_cargo_toml = function(file)
-  local path = vim.fn.fnamemodify(file, ':h')
-  while path ~= '/' do
-    local cargo_toml = path .. '/Cargo.toml'
-    if Path:new(cargo_toml):exists() then
-      return cargo_toml
-    end
-    path = vim.fn.fnamemodify(path, ':h')
+  local cargo_toml = file:find_upwards('Cargo.toml')
+  if cargo_toml == '' then
+    return nil
   end
-
-  return nil
+  return cargo_toml
 end
 
 -- parse toml file
----@param cargo_toml string
+---@param cargo_toml Path
 ---@return table
 local function parse_toml(cargo_toml)
-  local text = Path:new(cargo_toml):read()
+  local text = cargo_toml:read()
   return require('rust-quick-tests.toml').parse(text)
 end
 
 -- return the module name given a rust src file and a cargo toml file
----@param rust_file string
----@param cargo_toml string
+---@param rust_file Path
+---@param cargo_toml Path
 ---@param toml table
 ---@return string
 local module_from_path = function(rust_file, cargo_toml, toml)
-  local dir = vim.fn.fnamemodify(cargo_toml, ':h')
-
-  local relative_path = vim.fn.substitute(rust_file, dir, '', 'g')
+  local dir = cargo_toml:parent():absolute()
+  local relative_path = rust_file:make_relative(dir)
 
   if toml.lib ~= nil then
     relative_path = vim.fn.substitute(relative_path, toml.lib.path, '', 'g')
@@ -77,12 +74,18 @@ local module_from_path = function(rust_file, cargo_toml, toml)
   end
 
   relative_path = relative_path:gsub('mod.rs', '')
-  relative_path = relative_path:gsub('.rs', '')
   relative_path = relative_path:gsub('^/', '')
+  relative_path = relative_path:gsub('/$', '')
+  relative_path = relative_path:gsub('.rs', '')
   local module_name = relative_path:gsub('/', '::')
 
   return module_name
 end
+
+local rust_file = Path:new('/Users/pg/github/rust-quick-tests.nvim/example/src/bar/mod.rs')
+local cargo_toml = Path:new('/Users/pg/github/rust-quick-tests.nvim/example/Cargo.toml')
+local toml = { package = { name = 'example' } }
+print(module_from_path(rust_file, cargo_toml, toml))
 
 -- create test runnable
 ---@param test_name string
@@ -92,7 +95,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   local names = vim.tbl_map(function(ns)
     return ns.name .. '::'
   end, namespace_stack)
-  local file = vim.api.nvim_buf_get_name(bufnr)
+  local file = Path:new(vim.api.nvim_buf_get_name(bufnr))
   local cargo_toml = get_cargo_toml(file)
   if cargo_toml == nil then
     return {}
@@ -172,7 +175,7 @@ end
 -- create bin runnable
 ---@return table
 local function make_bin_runnable(bufnr)
-  local file = vim.api.nvim_buf_get_name(bufnr)
+  local file = Path:new(vim.api.nvim_buf_get_name(bufnr))
   local cargo_toml = get_cargo_toml(file)
   if cargo_toml == nil then
     return {}
@@ -191,7 +194,7 @@ local function make_bin_runnable(bufnr)
     command = command .. ' --release'
   end
 
-  if cfg.extra_args ~= '' then
+  if cfg.extra_args ~= nil then
     command = command .. ' ' .. cfg.extra_args
   end
 
