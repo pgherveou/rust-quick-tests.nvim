@@ -116,7 +116,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   local command = string.format(
     'cargo test %s --manifest-path %s --all-features %s -- --exact --nocapture',
     releaseFlag,
-    cargo_toml,
+    cargo_toml:make_relative(),
     full_test_name
   )
 
@@ -183,7 +183,7 @@ local function make_bin_runnable(bufnr)
 
   local toml = parse_toml(cargo_toml)
   local bin_arg = get_bin_arg(toml, file)
-  local command = string.format('cargo run --manifest-path %s', cargo_toml)
+  local command = string.format('cargo run --manifest-path %s', cargo_toml:make_relative())
   if bin_arg ~= nil then
     command = command .. ' --bin ' .. bin_arg
   end
