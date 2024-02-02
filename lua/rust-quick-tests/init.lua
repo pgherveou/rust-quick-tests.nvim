@@ -17,6 +17,9 @@ M.setup = function()
       config.update({ extra_args = args })
     elseif cmd == 'release' then
       config.update({ release = true })
+    elseif cmd == 'rust-log' then
+      local args = table.concat(opts.fargs, ' ')
+      config.update({ rust_log = args })
     elseif cmd == 'dev' then
       config.update({ release = false })
     else
@@ -34,7 +37,7 @@ M.setup = function()
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev' }
+      return { 'args', 'release', 'dev', 'rust-log' }
     end,
   })
 end

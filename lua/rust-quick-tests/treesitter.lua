@@ -82,11 +82,6 @@ local module_from_path = function(rust_file, cargo_toml, toml)
   return module_name
 end
 
-local rust_file = Path:new('/Users/pg/github/rust-quick-tests.nvim/example/src/bar/mod.rs')
-local cargo_toml = Path:new('/Users/pg/github/rust-quick-tests.nvim/example/Cargo.toml')
-local toml = { package = { name = 'example' } }
-print(module_from_path(rust_file, cargo_toml, toml))
-
 -- create test runnable
 ---@param test_name string
 ---@param namespace_stack NamespaceInfo[]
@@ -108,13 +103,20 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     full_test_name = module_prefix .. '::' .. full_test_name
   end
 
+  local cfg = config.cwd_config()
   local releaseFlag = ''
-  if config.cwd_config().release then
+  if cfg.release then
     releaseFlag = '--release '
   end
 
+  local rustLog = ''
+  if cfg.rust_log ~= '' and cfg.rust_log ~= nil then
+    rustLog = string.format('RUST_LOG=%s ', cfg.rust_log)
+  end
+
   local command = string.format(
-    'cargo test %s--manifest-path %s --all-features %s -- --exact --nocapture',
+    '%scargo test %s--manifest-path %s --all-features %s -- --exact --nocapture',
+    rustLog,
     releaseFlag,
     cargo_toml:make_relative(),
     full_test_name
@@ -183,20 +185,20 @@ local function make_bin_runnable(bufnr)
 
   local toml = parse_toml(cargo_toml)
   local bin_arg = get_bin_arg(toml, file)
-  local command = string.format('cargo run --manifest-path %s', cargo_toml:make_relative())
-  if bin_arg ~= nil then
-    command = command .. ' --bin ' .. bin_arg
-  end
 
   local cfg = config.cwd_config()
 
-  if cfg.release then
-    command = command .. ' --release'
+  local rustLog = ''
+  if cfg.rust_log ~= '' and cfg.rust_log ~= nil then
+    rustLog = string.format('RUST_LOG=%s ', cfg.rust_log)
   end
 
-  if cfg.extra_args ~= nil then
-    command = command .. ' ' .. cfg.extra_args
+  local releaseFlag = ''
+  if cfg.release then
+    releaseFlag = '--release '
   end
+
+  local command = string.format('%scargo run %s --manifest-path %s', rustLog, releaseFlag, cargo_toml:make_relative())
 
   local runCommand = {
     id = 'run_main',

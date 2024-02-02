@@ -46,3 +46,4 @@ Usage:
 - RustQuick args <args> - Set extra args to pass to cargo run
 - RustQuick release - Run tests in release mode
 - RustQuick dev - Run tests in dev mode
+- RustQuick rust-log <args> - Set the RUST_LOG environment variable

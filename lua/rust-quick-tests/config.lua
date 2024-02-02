@@ -7,6 +7,8 @@ local M = {}
 ---@class LocalConfig
 local default_config = {
   ---@type string
+  rust_log = '',
+  ---@type string
   extra_args = '',
   ---@type string
   last_cmd = nil,
