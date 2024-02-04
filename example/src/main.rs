@@ -1,7 +1,7 @@
 mod foo;
 mod bar;
 fn main() {
-    println!("Hello, world!");
+    println!("{:?}", std::env::args().collect::<Vec<String>>());
 }
 
 #[test]

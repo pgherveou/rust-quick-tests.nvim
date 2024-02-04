@@ -104,20 +104,11 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   end
 
   local cfg = config.cwd_config()
-  local releaseFlag = ''
-  if cfg.release then
-    releaseFlag = '--release '
-  end
-
-  local rustLog = ''
-  if cfg.rust_log ~= '' and cfg.rust_log ~= nil then
-    rustLog = string.format('RUST_LOG=%s ', cfg.rust_log)
-  end
 
   local command = string.format(
     '%scargo test %s--manifest-path %s --all-features %s -- --exact --nocapture',
-    rustLog,
-    releaseFlag,
+    cfg:rustLog(),
+    cfg:releaseFlag(),
     cargo_toml:make_relative(),
     full_test_name
   )
@@ -187,18 +178,13 @@ local function make_bin_runnable(bufnr)
   local bin_arg = get_bin_arg(toml, file)
 
   local cfg = config.cwd_config()
-
-  local rustLog = ''
-  if cfg.rust_log ~= '' and cfg.rust_log ~= nil then
-    rustLog = string.format('RUST_LOG=%s ', cfg.rust_log)
-  end
-
-  local releaseFlag = ''
-  if cfg.release then
-    releaseFlag = '--release '
-  end
-
-  local command = string.format('%scargo run %s --manifest-path %s', rustLog, releaseFlag, cargo_toml:make_relative())
+  local command = string.format(
+    '%scargo run %s --manifest-path %s %s',
+    cfg:rustLog(),
+    cfg:releaseFlag(),
+    cargo_toml:make_relative(),
+    cfg:extraArgs()
+  )
 
   local runCommand = {
     id = 'run_main',
