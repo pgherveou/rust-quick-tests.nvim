@@ -4,13 +4,6 @@ local cache = Path:new(string.format('%s/quick-tests.json', data_path))
 
 local M = {}
 
-local default_config = {
-  rust_log = '',
-  extra_args = '',
-  last_cmd = nil,
-  release = false,
-}
-
 ---@class Config
 ---@field rust_log string
 ---@field extra_args string
@@ -65,6 +58,12 @@ end
 ---@return Config
 M.cwd_config = function()
   local cfg = global_config()[vim.fn.getcwd()] or {}
+  local default_config = {
+    rust_log = '',
+    extra_args = '',
+    last_cmd = nil,
+    release = false,
+  }
   cfg = vim.tbl_deep_extend('force', default_config, cfg)
   return Config:new(cfg)
 end

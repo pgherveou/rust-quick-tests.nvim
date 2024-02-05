@@ -1,5 +1,6 @@
 local M = {}
 
+---@source types.lua
 local Path = require('plenary.path')
 local config = require('rust-quick-tests.config')
 
@@ -23,19 +24,9 @@ local query_str = [[
   )
 ]]
 
----@class TSNode
-local _TSNode = {}
-
----@class Path
-local _Path = {}
-
 ---@class NamespaceInfo
-local _state = {
-  ---@type string
-  name = nil,
-  ---@type TSNode
-  node = nil,
-}
+---@field name string
+---@field node TSNode
 
 -- Get the path to the nearest Cargo.toml file
 ---@param file Path
