@@ -4,11 +4,13 @@ local cache = Path:new(string.format('%s/quick-tests.json', data_path))
 
 local M = {}
 
----@class Config
----@field rust_log string
----@field extra_args string
----@field last_cmd string | nil
----@field release boolean
+---@class ConfigState
+---@field rust_log? string
+---@field extra_args? string
+---@field last_cmd? string
+---@field release? boolean
+
+---@class Config: ConfigState
 local Config = {}
 
 --- Get the rust log command part
@@ -42,7 +44,7 @@ end
 local global_cfg = nil
 
 -- Get the global config
----@return table<string, Config>
+---@return table<string, ConfigState>
 local function global_config()
   if global_cfg == nil then
     if cache:exists() then
@@ -58,6 +60,7 @@ end
 ---@return Config
 M.cwd_config = function()
   local cfg = global_config()[vim.fn.getcwd()] or {}
+  ---@type ConfigState
   local default_config = {
     rust_log = '',
     extra_args = '',
@@ -76,7 +79,7 @@ function Config:new(cfg)
 end
 
 -- Update the global config
----@param update table
+---@param update ConfigState
 function M.update(update)
   global_cfg = vim.tbl_deep_extend('force', global_config(), { [vim.fn.getcwd()] = update })
   cache:write(vim.fn.json_encode(global_cfg), 'w')
