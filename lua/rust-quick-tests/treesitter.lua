@@ -3,6 +3,7 @@ local M = {}
 ---@source types.lua
 local Path = require('plenary.path')
 local config = require('rust-quick-tests.config')
+local Command = require('rust-quick-tests.command')
 
 -- query to parse test names from a file
 local query_str = [[
@@ -54,7 +55,7 @@ end
 ---@return string
 local module_from_path = function(rust_file, cargo_toml, toml)
   local dir = cargo_toml:parent():absolute()
-  local relative_path = rust_file:make_relative(dir)
+  local relative_path = Path:new(rust_file:absolute()):make_relative(dir)
 
   if toml.lib ~= nil then
     relative_path = vim.fn.substitute(relative_path, toml.lib.path, '', 'g')
@@ -82,6 +83,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     return ns.name .. '::'
   end, namespace_stack)
   local file = Path:new(vim.api.nvim_buf_get_name(bufnr))
+  local src_path = file:absolute()
   local cargo_toml = get_cargo_toml(file)
   if cargo_toml == nil then
     return {}
@@ -95,35 +97,60 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   end
 
   local cfg = config.cwd_config()
-
-  local command = string.format(
-    '%scargo test %s--manifest-path %s --all-features %s -- --exact --nocapture',
-    cfg:rustLog(),
-    cfg:releaseFlag(),
-    cargo_toml:make_relative(),
-    full_test_name
-  )
-
   local runCommand = {
-    id = 'run_test',
-    command = command,
+    command = Command:new({
+      command = 'cargo',
+      manifest_path = cargo_toml:absolute(),
+      env = cfg:rustLog(),
+      args = {
+        'test',
+        cfg:releaseFlag(),
+        '--manifest-path',
+        cargo_toml:make_relative(),
+        '--all-features',
+        full_test_name,
+        '--',
+        '--exact',
+        '--nocapture',
+      },
+    }),
+    type = 'run',
     title = '▶︎ Run Test',
     tooltip = 'test ' .. full_test_name,
   }
 
-  -- TODO handle debug command
-  -- local debugCommand = {
-  --   id = 'debug_test',
-  --   command = command,
-  --   title = '▶︎ Debug Test',
-  --   tooltip = 'debug ' .. full_test_name,
-  -- }
+  local debugCommand = {
+    command = Command:new({
+      command = 'cargo',
+      manifest_path = cargo_toml:absolute(),
+      env = cfg:rustLog(),
+      args = {
+        'test',
+        '--no-run',
+        '--message-format=json',
+        '--manifest-path',
+        cargo_toml:make_relative(),
+        '--all-features',
+        full_test_name,
+      },
+      debug_args = {
+        full_test_name,
+        '--',
+        '--exact',
+        '--nocapture',
+      },
+    }),
+    type = 'debug',
+    title = '▶︎ Debug Test',
+    tooltip = 'debug ' .. full_test_name,
+  }
 
   return {
     actions = {
       {
         commands = {
           runCommand,
+          debugCommand,
         },
       },
     },
@@ -169,18 +196,29 @@ local function make_bin_runnable(bufnr)
   local bin_arg = get_bin_arg(toml, file)
 
   local cfg = config.cwd_config()
-  local command = string.format(
-    '%scargo run %s --manifest-path %s %s',
-    cfg:rustLog(),
-    cfg:releaseFlag(),
-    cargo_toml:make_relative(),
-    cfg:extraArgs()
-  )
 
   local runCommand = {
-    id = 'run_main',
-    command = command,
+    command = Command:new({
+      command = 'cargo',
+      manifest_path = cargo_toml:absolute(),
+      env = cfg:rustLog(),
+      args = { 'run', cfg:releaseFlag(), '--manifest-path', cargo_toml:make_relative(), cfg:extraArgs() },
+    }),
+    type = 'run',
     title = '▶︎ Run ' .. (bin_arg or 'main'),
+  }
+
+  local debugCommand = {
+    id = 'debug',
+    command = Command:new({
+      command = 'cargo',
+      manifest_path = cargo_toml:absolute(),
+      env = cfg:rustLog(),
+      args = { 'build', '--manifest-path', cargo_toml:make_relative(), '--message-format', 'json' },
+      debug_args = cfg:extraArgs(),
+    }),
+    type = 'debug',
+    title = '▶︎ Debug ' .. (bin_arg or 'main'),
   }
 
   return {
@@ -188,6 +226,7 @@ local function make_bin_runnable(bufnr)
       {
         commands = {
           runCommand,
+          debugCommand,
         },
       },
     },

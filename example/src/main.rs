@@ -1,17 +1,15 @@
-mod foo;
 mod bar;
+mod foo;
+
+
 fn main() {
     println!("{:?}", std::env::args().collect::<Vec<String>>());
 }
 
 #[test]
-fn test_1(){
-  
-}
+fn test_1() {}
 
 mod test {
     #[test]
-    fn test_2(){
-      
-    }
+    fn test_2() {}
 }

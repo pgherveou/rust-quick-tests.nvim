@@ -14,30 +14,30 @@ local M = {}
 local Config = {}
 
 --- Get the rust log command part
----@return string
+---@return table<string, string>
 function Config:rustLog()
   if self.rust_log ~= '' then
-    return string.format('RUST_LOG=%s ', self.rust_log)
+    return { RUST_LOG = self.rust_log }
   end
-  return ''
+  return {}
 end
 
 --- Get the release flag
----@return string
+---@return string[]
 function Config:releaseFlag()
   if self.release then
-    return '--release '
+    return { '--release' }
   end
-  return ''
+  return {}
 end
 
 --- Get the extra args
----@return string
+---@return string[]
 function Config:extraArgs()
   if self.extra_args ~= '' then
-    return string.format('%s ', self.extra_args)
+    return vim.split(self.extra_args, ' ')
   end
-  return ''
+  return {}
 end
 
 ---@class table<string, Config> | nil

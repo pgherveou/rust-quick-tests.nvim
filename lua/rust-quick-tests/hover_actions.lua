@@ -1,4 +1,5 @@
 -- Adapted from https://github.com/mrcjkb/rustaceanvim
+---@source types.lua
 local lsp_util = vim.lsp.util
 local ts = require('rust-quick-tests.treesitter')
 local config = require('rust-quick-tests.config')
@@ -6,9 +7,9 @@ local M = {}
 
 ---@class HoverActionsState
 local _state = {
-  ---@type integer
+  ---@type integer | nil
   winnr = nil,
-  ---@type unknown
+  ---@type CommandInfo[]
   commands = nil,
 }
 
@@ -17,6 +18,7 @@ local function close_hover()
   ui.close_win(_state.winnr)
 end
 
+--@param cmd string
 local function execute_command(cmd)
   require('rust-quick-tests.termopen').execute_command(cmd)
 end
@@ -31,11 +33,16 @@ local function run_command()
     return
   end
 
-  local command = _state.commands[line].command
-
+  local info = _state.commands[line]
   close_hover()
-  config.update({ last_cmd = command })
-  execute_command(command)
+
+  if info.type == 'run' then
+    local command = info.command:to_string()
+    config.update({ last_cmd = command })
+    execute_command(command)
+  else
+    require('rust-quick-tests.dap').start(info.command)
+  end
 end
 
 ---@return string[]
