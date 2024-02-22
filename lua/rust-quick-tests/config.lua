@@ -6,6 +6,7 @@ local M = {}
 
 ---@class ConfigState
 ---@field rust_log? string
+---@field all_features? boolean
 ---@field extra_args? string
 ---@field last_cmd? string
 ---@field release? boolean
@@ -31,6 +32,15 @@ function Config:releaseFlag()
   return {}
 end
 
+--- Get the --all-features flag
+---@return string[]
+function Config:allFeaturesFlag()
+  if self.all_features then
+    return { '--all-features' }
+  end
+  return {}
+end
+
 --- Get the extra args
 ---@return string[]
 function Config:extraArgs()
@@ -48,7 +58,7 @@ local global_cfg = nil
 local function global_config()
   if global_cfg == nil then
     if cache:exists() then
-      global_cfg = vim.json.decode(cache:read())
+      global_cfg = vim.json.decode(cache:read()) or {}
     else
       global_cfg = {}
     end
@@ -66,6 +76,7 @@ M.cwd_config = function()
     extra_args = '',
     last_cmd = nil,
     release = false,
+    all_features = false,
   }
   cfg = vim.tbl_deep_extend('force', default_config, cfg)
   return Config:new(cfg)
