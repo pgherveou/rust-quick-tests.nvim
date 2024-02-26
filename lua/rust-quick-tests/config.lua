@@ -6,7 +6,7 @@ local M = {}
 
 ---@class ConfigState
 ---@field rust_log? string
----@field all_features? boolean
+---@field features? string
 ---@field extra_args? string
 ---@field last_cmd? string
 ---@field release? boolean
@@ -32,12 +32,15 @@ function Config:releaseFlag()
   return {}
 end
 
---- Get the --all-features flag
+--- Get the features flag
 ---@return string[]
-function Config:allFeaturesFlag()
-  if self.all_features then
+function Config:featuresFlag()
+  if self.features == 'all' then
     return { '--all-features' }
+  elseif self.features ~= '' then
+    return { '--features', self.features }
   end
+
   return {}
 end
 
@@ -76,7 +79,7 @@ M.cwd_config = function()
     extra_args = '',
     last_cmd = nil,
     release = false,
-    all_features = false,
+    features = '',
   }
   cfg = vim.tbl_deep_extend('force', default_config, cfg)
   return Config:new(cfg)

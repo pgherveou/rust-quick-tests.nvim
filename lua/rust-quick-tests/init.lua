@@ -20,9 +20,9 @@ M.setup = function()
     elseif cmd == 'log' then
       local args = table.concat(opts.fargs, ' ')
       config.update({ rust_log = args })
-    elseif cmd == 'all-features' then
-      local val = opts.fargs[1] ~= 'false'
-      config.update({ all_features = val })
+    elseif cmd == 'features' then
+      -- trim the string
+      config.update({ features = vim.trim(opts.fargs[1] or '') })
     elseif cmd == 'dev' then
       config.update({ release = false })
     else
@@ -40,7 +40,7 @@ M.setup = function()
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev', 'log', 'all-features' }
+      return { 'args', 'release', 'dev', 'log', 'features' }
     end,
   })
 end

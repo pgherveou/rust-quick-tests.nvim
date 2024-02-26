@@ -107,7 +107,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
         cfg:releaseFlag(),
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:allFeaturesFlag(),
+        cfg:featuresFlag(),
         full_test_name,
         '--',
         '--exact',
@@ -130,7 +130,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
         '--message-format=json',
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:allFeaturesFlag(),
+        cfg:featuresFlag(),
         full_test_name,
       },
       debug_args = {
