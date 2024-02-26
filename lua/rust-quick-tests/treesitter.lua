@@ -58,7 +58,7 @@ local module_from_path = function(rust_file, cargo_toml, toml)
   local relative_path = Path:new(rust_file:absolute()):make_relative(dir)
 
   if toml.lib ~= nil then
-    relative_path = vim.fn.substitute(relative_path, toml.lib.path, '', 'g')
+    relative_path = vim.fn.substitute(relative_path, toml.lib.path or 'src', '', 'g')
   else
     relative_path = vim.fn.substitute(relative_path, 'src/', '', 'g')
     relative_path = vim.fn.substitute(relative_path, 'main.rs', '', 'g')
