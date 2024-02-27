@@ -16,3 +16,14 @@ mod test {
     #[test]
     fn test_2() {}
 }
+
+/// Adds two numbers together.
+///
+/// # Examples
+///
+/// ```
+/// assert_eq!(2+3, 5);
+/// ```
+pub fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
