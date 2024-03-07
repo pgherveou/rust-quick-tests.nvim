@@ -214,7 +214,7 @@ local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
     command = Command:new({
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
-      env = cfg:rustLog(),
+      env = cfg:getEnv(),
       args = {
         'test',
         '--doc',
