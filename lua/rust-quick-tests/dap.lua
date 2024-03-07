@@ -184,8 +184,9 @@ function M.start(cmd)
           vim.notify('No artifact found for ' .. cmd.manifest_path, vim.log.levels.ERROR)
           return
         end
+        print('Debugging Artifact: ' .. artifact.executable)
 
-        local envs = vim.tbl_extend('force', cmd.env, environments[cmd.manifest_path] or {})
+        local envs = vim.tbl_extend('keep', cmd.env, environments[cmd.manifest_path] or { NVIM_DEBUG = 'true' })
         local config = {
           args = cmd.debug_args or {},
           env = envs,
