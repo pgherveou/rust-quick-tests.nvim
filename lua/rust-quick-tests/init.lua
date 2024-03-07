@@ -7,6 +7,15 @@ local M = {
   end,
 }
 
+local function array_to_dic(arr)
+  local dic = {}
+  for _, pair in ipairs(arr) do
+    local key, value = unpack(vim.split(pair, '=', { plain = true }))
+    dic[key] = value
+  end
+  return dic
+end
+
 M.setup = function()
   vim.api.nvim_create_user_command('RustQuick', function(opts)
     local config = require('rust-quick-tests.config')
@@ -17,9 +26,11 @@ M.setup = function()
       config.update({ extra_args = args })
     elseif cmd == 'release' then
       config.update({ release = true })
+    elseif cmd == 'env' then
+      config.update({ env = array_to_dic(opts.fargs) })
     elseif cmd == 'log' then
-      local args = table.concat(opts.fargs, ' ')
-      config.update({ rust_log = args })
+      local args = { RUST_LOG = opts.fargs[1] }
+      config.update({ env = args })
     elseif cmd == 'features' then
       -- trim the string
       config.update({ features = vim.trim(opts.fargs[1] or '') })
@@ -40,7 +51,7 @@ M.setup = function()
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev', 'log', 'features' }
+      return { 'args', 'release', 'dev', 'env', 'log', 'features' }
     end,
   })
 end

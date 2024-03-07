@@ -101,7 +101,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     command = Command:new({
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
-      env = cfg:rustLog(),
+      env = cfg:getEnv(),
       args = {
         'test',
         cfg:releaseFlag(),
@@ -123,7 +123,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     command = Command:new({
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
-      env = cfg:rustLog(),
+      env = cfg:getEnv(),
       args = {
         'test',
         '--no-run',
@@ -201,7 +201,7 @@ local function make_bin_runnable(bufnr)
     command = Command:new({
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
-      env = cfg:rustLog(),
+      env = cfg:getEnv(),
       args = { 'run', cfg:releaseFlag(), '--manifest-path', cargo_toml:make_relative(), cfg:extraArgs() },
     }),
     type = 'run',
@@ -213,7 +213,7 @@ local function make_bin_runnable(bufnr)
     command = Command:new({
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
-      env = cfg:rustLog(),
+      env = cfg:getEnv(),
       args = { 'build', '--manifest-path', cargo_toml:make_relative(), '--message-format', 'json' },
       debug_args = cfg:extraArgs(),
     }),

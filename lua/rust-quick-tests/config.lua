@@ -5,23 +5,14 @@ local cache = Path:new(string.format('%s/quick-tests.json', data_path))
 local M = {}
 
 ---@class ConfigState
----@field rust_log? string
 ---@field features? string
 ---@field extra_args? string
 ---@field last_cmd? string
 ---@field release? boolean
+---@field env? table<string, string>
 
 ---@class Config: ConfigState
 local Config = {}
-
---- Get the rust log command part
----@return table<string, string>
-function Config:rustLog()
-  if self.rust_log ~= '' then
-    return { RUST_LOG = self.rust_log }
-  end
-  return {}
-end
 
 --- Get the release flag
 ---@return string[]
@@ -42,6 +33,11 @@ function Config:featuresFlag()
   end
 
   return {}
+end
+
+--- Get the env flag
+function Config:getEnv()
+  return self.env or {}
 end
 
 --- Get the extra args
@@ -75,11 +71,11 @@ M.cwd_config = function()
   local cfg = global_config()[vim.fn.getcwd()] or {}
   ---@type ConfigState
   local default_config = {
-    rust_log = '',
     extra_args = '',
     last_cmd = nil,
     release = false,
     features = '',
+    env = {},
   }
   cfg = vim.tbl_deep_extend('force', default_config, cfg)
   return Config:new(cfg)

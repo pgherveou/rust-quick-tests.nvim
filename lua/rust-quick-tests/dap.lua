@@ -185,9 +185,10 @@ function M.start(cmd)
           return
         end
 
+        local envs = vim.tbl_extend('force', cmd.env, environments[cmd.manifest_path] or {})
         local config = {
           args = cmd.debug_args or {},
-          env = environments[cmd.manifest_path],
+          env = envs,
           name = 'Rust debug client',
           program = artifact.executable,
           request = 'launch',
