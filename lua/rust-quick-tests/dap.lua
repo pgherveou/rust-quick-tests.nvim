@@ -185,6 +185,7 @@ function M.start(cmd)
           return
         end
         print('Debugging Artifact: ' .. artifact.executable)
+        print('Debugging Args: ' .. vim.inspect(cmd.debug_args))
 
         local envs = vim.tbl_extend('keep', cmd.env, environments[cmd.manifest_path] or { NVIM_DEBUG = 'true' })
         local config = {
@@ -194,7 +195,6 @@ function M.start(cmd)
           program = artifact.executable,
           request = 'launch',
           sourceMap = source_maps[cmd.manifest_path],
-          stdio = { nil, vim.fn.tempname() }, -- https://github.com/vadimcn/codelldb/blob/v1.9.0/MANUAL.md#stdio-redirection
           stopOnEntry = false,
           type = 'codelldb',
         }

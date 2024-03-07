@@ -1,8 +1,11 @@
 mod bar;
-mod foo;
 
 fn main() {
-    println!("Hello, world!");
+    println!(
+        "Called with args {:?}",
+        std::env::args().collect::<Vec<_>>()
+    );
+
     println!(
         "called with RUST_LOG: {:?}",
         std::env::vars()
@@ -10,6 +13,7 @@ fn main() {
             .iter()
             .find(|(k, _)| k == "RUST_LOG")
     );
+    println!();
 }
 
 #[test]
