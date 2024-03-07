@@ -184,12 +184,14 @@ function M.start(cmd)
           vim.notify('No artifact found for ' .. cmd.manifest_path, vim.log.levels.ERROR)
           return
         end
+        local args = cmd.debug_args or {}
+        args = args[1] == '--' and { unpack(args, 2) } or args
         print('Debugging Artifact: ' .. artifact.executable)
-        print('Debugging Args: ' .. vim.inspect(cmd.debug_args))
+        print('Debugging Args: ' .. vim.inspect(args))
 
         local envs = vim.tbl_extend('keep', cmd.env, environments[cmd.manifest_path] or { NVIM_DEBUG = 'true' })
         local config = {
-          args = cmd.debug_args or {},
+          args = args,
           env = envs,
           name = 'Rust debug client',
           program = artifact.executable,
