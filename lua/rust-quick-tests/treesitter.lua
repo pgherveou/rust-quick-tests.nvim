@@ -279,7 +279,7 @@ local function make_bin_runnable(bufnr)
   end
 
   local toml = parse_toml(cargo_toml)
-  local bin_arg = get_bin_arg(toml, file)
+  local bin_arg = get_bin_arg(toml, file:absolute())
 
   local cfg = config.cwd_config()
 
