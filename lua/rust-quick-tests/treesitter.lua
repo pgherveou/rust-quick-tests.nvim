@@ -7,7 +7,10 @@ local Command = require('rust-quick-tests.command')
 
 -- query to parse test names from a file
 local query_str = [[
+  ; Match namespace
   (mod_item name: (identifier) @namespace.name)
+
+  ; Match test function
   (
     (attribute_item
       [
@@ -19,11 +22,31 @@ local query_str = [[
     (function_item name: (identifier) @test.name) @test.definition
     (#match? @macro_name ".*test$")
   )
+
+  ; Match main function
   (
     (function_item name: (identifier) @main_name)
     (#eq? @main_name "main")
   )
+
+  ; Match any item with a doc comment
+  (
+    (line_comment) @doc_comment
+  )
 ]]
+
+--- Get the first identifier in a node
+---@param node TSNode
+---@param bufnr number
+---@return string
+local function get_identifier(node, bufnr)
+  for child in node:iter_children() do
+    if child:type() == 'identifier' then -- Adjust the type according to the language grammar
+      return vim.treesitter.get_node_text(child, bufnr)
+    end
+  end
+  return ''
+end
 
 ---@class NamespaceInfo
 ---@field name string
@@ -83,7 +106,6 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
     return ns.name .. '::'
   end, namespace_stack)
   local file = Path:new(vim.api.nvim_buf_get_name(bufnr))
-  local src_path = file:absolute()
   local cargo_toml = get_cargo_toml(file)
   if cargo_toml == nil then
     return {}
@@ -158,6 +180,70 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
       kind = 'markdown',
       value = string.format(
         '# %s\n```rust\nfn %s()\n```\n\n> Use `:RustQuick` to customize command',
+        toml.package.name,
+        full_test_name
+      ),
+    },
+  }
+end
+
+-- create doc test runnable
+---@param test_name string
+---@param line integer
+---@param namespace_stack NamespaceInfo[]
+---@return table
+local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
+  local names = vim.tbl_map(function(ns)
+    return ns.name .. '::'
+  end, namespace_stack)
+  local file = Path:new(vim.api.nvim_buf_get_name(bufnr))
+  local cargo_toml = get_cargo_toml(file)
+  if cargo_toml == nil then
+    return {}
+  end
+
+  local toml = parse_toml(cargo_toml)
+  local module_prefix = module_from_path(file, cargo_toml, toml)
+  local full_test_name = table.concat(names) .. test_name
+  if module_prefix ~= '' then
+    full_test_name = module_prefix .. '::' .. full_test_name
+  end
+
+  local cfg = config.cwd_config()
+  local runCommand = {
+    command = Command:new({
+      command = 'cargo',
+      manifest_path = cargo_toml:absolute(),
+      env = cfg:rustLog(),
+      args = {
+        'test',
+        '--doc',
+        cfg:releaseFlag(),
+        '--manifest-path',
+        cargo_toml:make_relative(),
+        cfg:featuresFlag(),
+        string.format('"%s\\ (line\\ %d)"', full_test_name, line),
+        '--',
+        '--nocapture',
+      },
+    }),
+    type = 'run',
+    title = '▶︎ Run Doc Test',
+    tooltip = 'test ' .. full_test_name,
+  }
+
+  return {
+    actions = {
+      {
+        commands = {
+          runCommand,
+        },
+      },
+    },
+    contents = {
+      kind = 'markdown',
+      value = string.format(
+        '# %s\n```rust\n%s\n```\n\n> Use `:RustQuick` to customize command',
         toml.package.name,
         full_test_name
       ),
@@ -287,6 +373,21 @@ M.find_runnable = function(bufnr, cursor)
         return make_test_runnable(bufnr, test_name, namespace_stack)
       elseif capture_name == 'main_name' then
         return make_bin_runnable(bufnr)
+      end
+    end
+
+    if capture_name == 'doc_comment' then
+      local doc_comment = vim.treesitter.get_node_text(node, bufnr)
+      if doc_comment:find('^/// ```') then
+        local next_node = node:next_sibling()
+        while next_node:type() == 'line_comment' do
+          next_node = next_node:next_sibling()
+        end
+        if is_cursor_in_row(next_node, cursor) then
+          local name = get_identifier(next_node, bufnr)
+          local line = node:start() + 1
+          return make_doc_test_runnable(bufnr, name, line, namespace_stack)
+        end
       end
     end
   end
