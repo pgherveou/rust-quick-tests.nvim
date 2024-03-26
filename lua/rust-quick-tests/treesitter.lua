@@ -20,7 +20,7 @@ local query_str = [[
     )
     .
     (function_item name: (identifier) @test.name) @test.definition
-    (#match? @macro_name ".*test$")
+    (#match? @macro_name ".*test$|benchmark")
   )
 
   ; Match main function
@@ -353,6 +353,20 @@ local is_cursor_in_row = function(node, cursor)
   return cursor_row == start_row
 end
 
+-- Make the test name from the macro name and the test fn name
+--@param macro_name string
+--@param test_name string
+--@return string
+local function make_test_name(macro_name, test_fn_name)
+  -- polkadot-sdk #[bench] macros tests are named bench_<test_fn_name>
+  if macro_name == 'benchmark' then
+    return 'bench_' .. test_fn_name
+  end
+
+  -- all other supportest tests are named <test_fn_name>
+  return test_fn_name
+end
+
 -- Get Rust runnable for the buffer and cursor position
 ---@param bufnr number
 ---@param cursor table
@@ -363,6 +377,7 @@ M.find_runnable = function(bufnr, cursor)
   local query = vim.treesitter.query.parse('rust', query_str)
 
   local namespace_stack = {}
+  local macro_name = ''
 
   for id, node, _ in query:iter_captures(tree:root(), bufnr, 0, -1) do
     local capture_name = query.captures[id]
@@ -371,12 +386,17 @@ M.find_runnable = function(bufnr, cursor)
       table.remove(namespace_stack)
     end
 
+    if capture_name == 'macro_name' then
+      macro_name = vim.treesitter.get_node_text(node, bufnr)
+    end
+
     if capture_name == 'namespace.name' then
       local namespace_name = vim.treesitter.get_node_text(node, bufnr)
       table.insert(namespace_stack, { name = namespace_name, node = node:parent() })
     elseif is_cursor_in_row(node, cursor) then
       if capture_name == 'test.name' then
-        local test_name = vim.treesitter.get_node_text(node, bufnr)
+        local test_fn_name = vim.treesitter.get_node_text(node, bufnr)
+        local test_name = make_test_name(macro_name, test_fn_name)
         return make_test_runnable(bufnr, test_name, namespace_stack)
       elseif capture_name == 'main_name' then
         return make_bin_runnable(bufnr)
