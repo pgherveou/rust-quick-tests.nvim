@@ -91,7 +91,7 @@ local module_from_path = function(rust_file, cargo_toml, toml)
   relative_path = relative_path:gsub('mod.rs', '')
   relative_path = relative_path:gsub('^/', '')
   relative_path = relative_path:gsub('/$', '')
-  relative_path = relative_path:gsub('.rs', '')
+  relative_path = relative_path:gsub('%.rs$', '')
   local module_name = relative_path:gsub('/', '::')
 
   return module_name
