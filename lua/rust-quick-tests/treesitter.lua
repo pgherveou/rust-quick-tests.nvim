@@ -157,7 +157,6 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
       },
       debug_args = {
         full_test_name,
-        '--',
         '--exact',
         '--nocapture',
       },
