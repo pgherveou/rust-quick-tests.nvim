@@ -251,10 +251,34 @@ local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
   }
 end
 
+-- Get the example flag if the file is in the examples directory
+--@return string|nil
+local function get_example_flag()
+  if vim.fn.expand('%:p:h:t') == 'examples' then
+    return vim.fn.expand('%:t:r')
+  end
+  return nil
+end
+
+-- Build the args for the command, adding the example flag if necessary
+--@param args table
+local function make_args(args)
+  local example_flag = get_example_flag()
+  if example_flag then
+    table.insert(args, '--example')
+    table.insert(args, example_flag)
+  end
+  return args
+end
+
 -- get bin arg from Cargo.toml
 --@param toml table
 --@param file string
 local function get_bin_arg(toml, file)
+  local example_flag = get_example_flag()
+  if example_flag then
+    return example_flag
+  end
   local bins = toml.bin
   if bins == nil then
     return nil
@@ -268,7 +292,6 @@ local function get_bin_arg(toml, file)
 
   return nil
 end
-
 -- create bin runnable
 ---@return table
 local function make_bin_runnable(bufnr)
@@ -288,14 +311,14 @@ local function make_bin_runnable(bufnr)
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
-      args = {
+      args = make_args({
         'run',
         cfg:releaseFlag(),
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(),
         cfg:extraArgs(),
-      },
+      }),
     }),
     type = 'run',
     title = '▶︎ Run ' .. (bin_arg or 'main'),
@@ -307,7 +330,14 @@ local function make_bin_runnable(bufnr)
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
-      args = { 'build', '--manifest-path', cargo_toml:make_relative(), cfg:featuresFlag(), '--message-format', 'json' },
+      args = make_args({
+        'build',
+        '--manifest-path',
+        cargo_toml:make_relative(),
+        cfg:featuresFlag(),
+        '--message-format',
+        'json',
+      }),
       debug_args = cfg:extraArgs(),
     }),
     type = 'debug',

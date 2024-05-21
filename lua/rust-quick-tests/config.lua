@@ -95,4 +95,11 @@ function M.update(update)
   cache:write(vim.fn.json_encode(global_cfg), 'w')
 end
 
+-- Clear the global config
+function M.clear()
+  local config = global_config()
+  config[vim.fn.getcwd()] = {}
+  cache:write(vim.fn.json_encode(config), 'w')
+end
+
 return M

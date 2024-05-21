@@ -32,10 +32,11 @@ M.setup = function()
       local args = { RUST_LOG = opts.fargs[1] }
       config.update({ env = args })
     elseif cmd == 'features' then
-      -- trim the string
       config.update({ features = vim.trim(opts.fargs[1] or '') })
     elseif cmd == 'dev' then
       config.update({ release = false })
+    elseif cmd == 'clear' then
+      config.clear()
     else
       vim.notify('Unknown command: ' .. cmd, vim.log.levels.ERROR)
     end
@@ -51,7 +52,7 @@ M.setup = function()
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev', 'env', 'log', 'features' }
+      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features' }
     end,
   })
 end
