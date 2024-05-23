@@ -134,12 +134,18 @@ function M.handler(_, result)
   end, { buffer = bufnr, noremap = true, silent = true })
 end
 
---- Sends the request to rust-analyzer to get hover actions and handle it
-function M.hover_actions()
+function M.get_hover_actions()
   local bufnr = vim.api.nvim_get_current_buf()
   local cursor = vim.api.nvim_win_get_cursor(0)
-  local results = ts.find_runnable(bufnr, cursor)
-  M.handler(nil, results)
+  return ts.find_runnable(bufnr, cursor)
+end
+
+function M.show_actions(actions)
+  M.handler(nil, actions)
+end
+
+function M.hover_actions()
+  M.handler(nil, M.get_hover_actions())
 end
 
 function M.replay_last()
