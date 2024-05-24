@@ -14,7 +14,7 @@ local M = {
     latest_buf_id = vim.api.nvim_create_buf(false, true)
 
     -- split the window to create a new buffer and set it to our window
-    ui.split(false, latest_buf_id)
+    ui.split(latest_buf_id, true)
 
     -- make the new buffer smaller
     ui.resize(false, '-5')

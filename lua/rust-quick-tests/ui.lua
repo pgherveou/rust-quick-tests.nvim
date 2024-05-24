@@ -15,10 +15,10 @@ function M.close_win(winnr)
   end
 end
 
----@param vertical boolean
 ---@param bufnr integer
-function M.split(vertical, bufnr)
-  local cmd = vertical and 'vsplit' or 'split'
+---@param vertical boolean
+function M.split(bufnr, vertical)
+  local cmd = vertical and 'verti bel vsplit' or 'split'
 
   vim.cmd(cmd)
   local win = vim.api.nvim_get_current_win()
