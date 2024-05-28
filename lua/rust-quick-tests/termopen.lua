@@ -16,9 +16,6 @@ local M = {
     -- split the window to create a new buffer and set it to our window
     ui.split(latest_buf_id, true)
 
-    -- make the new buffer smaller
-    ui.resize(false, '-5')
-
     -- close the buffer when escape is pressed :)
     vim.api.nvim_buf_set_keymap(latest_buf_id, 'n', '<Esc>', ':q<CR>', { noremap = true })
 
