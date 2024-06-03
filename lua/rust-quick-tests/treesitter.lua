@@ -284,7 +284,9 @@ local function get_bin_arg(toml, file)
   end
 
   for _, bin in pairs(bins) do
-    if file:sub(-#bin.path) == bin.path then
+    if bin.path == nil then
+      return bin.name
+    elseif file:sub(-#bin.path) == bin.path then
       return bin.name
     end
   end
