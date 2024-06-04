@@ -253,10 +253,16 @@ end
 -- Get the example flag if the file is in the examples directory
 --@return string|nil
 local function get_example_flag()
-  if vim.fn.expand('%:p:h:t') == 'examples' then
-    return vim.fn.expand('%:t:r')
+  local file_path = vim.fn.expand('%:p')
+  -- /examples/<component>/main.rs
+  local component = file_path:match('/examples/([^/]+)/[^/]+%.%w+$')
+  if component then
+    return component
   end
-  return nil
+
+  -- /examples/<component>.rs
+  component = file_path:match('/examples/([^/]+)%.rs$')
+  return component
 end
 
 -- Build the args for the command, adding the example flag if necessary

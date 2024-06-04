@@ -193,6 +193,9 @@ function M.start(cmd)
         local config = {
           args = args,
           env = envs,
+          initCommands = {
+            'settings set plugin.jit-loader.gdb.enable on',
+          },
           name = 'Rust debug client',
           program = artifact.executable,
           request = 'launch',
