@@ -16,18 +16,20 @@ local M = {
     -- split the window to create a new buffer and set it to our window
     ui.split(latest_buf_id, true)
 
-    -- close the buffer when escape is pressed :)
-    vim.api.nvim_buf_set_keymap(latest_buf_id, 'n', '<Esc>', ':q<CR>', { noremap = true })
-
     -- run the command
-    vim.fn.termopen(full_command)
+    local job_id = vim.fn.termopen(full_command)
 
-    -- when the buffer is closed, set the latest buf id to nil else there are
-    -- some edge cases with the id being sit but a buffer not being open
-    local function onDetach(_, _)
-      latest_buf_id = nil
-    end
-    vim.api.nvim_buf_attach(latest_buf_id, false, { on_detach = onDetach })
+    -- close the buffer when escape is pressed :)
+    vim.keymap.set('n', '<ESC>', function()
+      vim.api.nvim_buf_delete(latest_buf_id, { force = true })
+    end, { buffer = latest_buf_id, noremap = true, silent = true })
+
+    vim.api.nvim_buf_attach(latest_buf_id, false, {
+      on_detach = function()
+        vim.fn.jobstop(job_id)
+        latest_buf_id = nil
+      end,
+    })
   end,
 }
 
