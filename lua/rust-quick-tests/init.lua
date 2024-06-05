@@ -26,6 +26,8 @@ M.setup = function()
       config.update({ extra_args = args })
     elseif cmd == 'release' then
       config.update({ release = true })
+    elseif cmd == 'dev' then
+      config.update({ release = false })
     elseif cmd == 'env' then
       config.update({ env = array_to_dic(opts.fargs) })
     elseif cmd == 'log' then
@@ -33,10 +35,10 @@ M.setup = function()
       config.update({ env = args })
     elseif cmd == 'features' then
       config.update({ features = vim.trim(opts.fargs[1] or '') })
-    elseif cmd == 'dev' then
-      config.update({ release = false })
     elseif cmd == 'clear' then
       config.clear()
+    elseif cmd == 'show' then
+      print(vim.inspect(config.cwd_config()))
     else
       vim.notify('Unknown command: ' .. cmd, vim.log.levels.ERROR)
     end
@@ -47,12 +49,17 @@ M.setup = function()
   RustQuick args <args> - Set extra args to pass to cargo run
   RustQuick release - Run tests in release mode
   RustQuick dev - Run tests in dev mode
+  RustQuick env <key=value> - Set environment variable
+  RustQuick log <level> - Set RUST_LOG environment variable
+  RustQuick features <features> - Set the features flag
+  RUstQuick clear - Clear the current config
+  RustQuick show - Show the current config
   ]],
     complete = function(_, cmdline)
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features' }
+      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features', 'show' }
     end,
   })
 end

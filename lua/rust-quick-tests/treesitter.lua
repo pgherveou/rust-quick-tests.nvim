@@ -250,40 +250,33 @@ local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
   }
 end
 
--- Get the example flag if the file is in the examples directory
---@return string|nil
-local function get_example_flag()
+-- Get the example args if the file is in the examples directory
+--@return table
+local function exampleArgs()
   local file_path = vim.fn.expand('%:p')
   -- /examples/<component>/main.rs
   local component = file_path:match('/examples/([^/]+)/[^/]+%.%w+$')
   if component then
-    return component
+    return { '--example', component }
   end
 
   -- /examples/<component>.rs
   component = file_path:match('/examples/([^/]+)%.rs$')
-  return component
-end
-
--- Build the args for the command, adding the example flag if necessary
---@param args table
-local function make_args(args)
-  local example_flag = get_example_flag()
-  if example_flag then
-    table.insert(args, '--example')
-    table.insert(args, example_flag)
+  if component then
+    return { '--example', component }
   end
-  return args
+  return {}
 end
 
 -- get bin arg from Cargo.toml
 --@param toml table
 --@param file string
-local function get_bin_arg(toml, file)
-  local example_flag = get_example_flag()
-  if example_flag then
-    return example_flag
+local function get_bin_name(toml, file)
+  local example_args = exampleArgs()
+  if next(example_args) ~= nil then
+    return example_args[2]
   end
+
   local bins = toml.bin
   if bins == nil then
     return nil
@@ -309,7 +302,7 @@ local function make_bin_runnable(bufnr)
   end
 
   local toml = parse_toml(cargo_toml)
-  local bin_arg = get_bin_arg(toml, file:absolute())
+  local bin_name = get_bin_name(toml, file:absolute())
 
   local cfg = config.cwd_config()
 
@@ -318,17 +311,18 @@ local function make_bin_runnable(bufnr)
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
-      args = make_args({
+      args = {
         'run',
         cfg:releaseFlag(),
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(),
+        exampleArgs(),
         cfg:extraArgs(),
-      }),
+      },
     }),
     type = 'run',
-    title = '▶︎ Run ' .. (bin_arg or 'main'),
+    title = '▶︎ Run ' .. (bin_name or 'main'),
   }
 
   local debugCommand = {
@@ -337,18 +331,19 @@ local function make_bin_runnable(bufnr)
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
-      args = make_args({
+      args = {
         'build',
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(),
+        exampleArgs(),
         '--message-format',
         'json',
-      }),
+      },
       debug_args = cfg:extraArgs(),
     }),
     type = 'debug',
-    title = '▶︎ Debug ' .. (bin_arg or 'main'),
+    title = '▶︎ Debug ' .. (bin_name or 'main'),
   }
 
   return {
