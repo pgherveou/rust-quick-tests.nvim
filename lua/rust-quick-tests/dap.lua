@@ -163,6 +163,9 @@ end
 ---@param cmd Command
 function M.start(cmd)
   configure(Path:new(cmd.manifest_path):parent())
+
+  require('rust-quick-tests.config').update({ last_cmd_file = cmd.file, last_cmd_cursor = cmd.cursor })
+
   vim.notify('Compiling a debug build for debugging. This might take some time...')
   vim.notify('Building: ' .. cmd:to_string())
 
@@ -193,9 +196,9 @@ function M.start(cmd)
         local config = {
           args = args,
           env = envs,
-          initCommands = {
-            'settings set plugin.jit-loader.gdb.enable on',
-          },
+          -- initCommands = {
+          --   'settings set plugin.jit-loader.gdb.enable on',
+          -- },
           name = 'Rust debug client',
           program = artifact.executable,
           request = 'launch',

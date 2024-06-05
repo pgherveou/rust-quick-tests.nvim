@@ -5,6 +5,8 @@
 ---@field debug_args? string[]
 ---@field manifest_path string
 ---@field cargo_root string
+---@field file string
+---@field cursor number[]
 
 ---@class Command: CommandState
 local Command = {}

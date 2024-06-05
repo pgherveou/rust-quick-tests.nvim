@@ -308,6 +308,8 @@ local function make_bin_runnable(bufnr)
 
   local runCommand = {
     command = Command:new({
+      file = file:absolute(),
+      cursor = vim.api.nvim_win_get_cursor(0),
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
@@ -328,6 +330,8 @@ local function make_bin_runnable(bufnr)
   local debugCommand = {
     id = 'debug',
     command = Command:new({
+      file = file:absolute(),
+      cursor = vim.api.nvim_win_get_cursor(0),
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),

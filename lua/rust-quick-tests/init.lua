@@ -5,6 +5,9 @@ local M = {
   replay_last = function()
     require('rust-quick-tests.hover_actions').replay_last()
   end,
+  snap_last = function()
+    require('rust-quick-tests.hover_actions').snap_last()
+  end,
 }
 
 local function array_to_dic(arr)

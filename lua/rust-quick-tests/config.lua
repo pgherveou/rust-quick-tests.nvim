@@ -8,6 +8,8 @@ local M = {}
 ---@field features? string
 ---@field extra_args? string
 ---@field last_cmd? string
+---@field last_cmd_file? string
+---@field last_cmd_cursor? number[]
 ---@field release? boolean
 ---@field env? table<string, string>
 

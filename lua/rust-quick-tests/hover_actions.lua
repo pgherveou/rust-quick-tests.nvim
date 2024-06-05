@@ -37,9 +37,11 @@ local function run_command()
   close_hover()
 
   if info.type == 'run' then
-    local command = info.command:to_string()
-    config.update({ last_cmd = command })
-    execute_command(command)
+    local cmd = info.command
+    local last_cmd = cmd:to_string()
+
+    config.update({ last_cmd = last_cmd, last_cmd_file = cmd.file, last_cmd_cursor = cmd.cursor })
+    execute_command(last_cmd)
   else
     require('rust-quick-tests.dap').start(info.command)
   end
@@ -152,6 +154,17 @@ function M.replay_last()
   local last_cmd = config.cwd_config().last_cmd
   if last_cmd ~= nil then
     execute_command(last_cmd)
+  end
+end
+
+function M.snap_last()
+  local last_cmd = config.cwd_config()
+  local last_cmd_file = last_cmd.last_cmd_file
+  local last_cmd_cursor = last_cmd.last_cmd_cursor or { 1, 0 }
+
+  if last_cmd_file ~= nil then
+    vim.cmd('e ' .. last_cmd_file)
+    vim.api.nvim_win_set_cursor(0, last_cmd_cursor)
   end
 end
 
