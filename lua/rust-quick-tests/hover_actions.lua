@@ -142,6 +142,10 @@ function M.get_hover_actions()
   return ts.find_runnable(bufnr, cursor)
 end
 
+function M.show_actions(actions)
+  M.handler(nil, actions)
+end
+
 function M.hover_actions()
   M.handler(nil, M.get_hover_actions())
 end
