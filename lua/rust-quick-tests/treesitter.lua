@@ -121,6 +121,8 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
   local cfg = config.cwd_config()
   local runCommand = {
     command = Command:new({
+      file = file:absolute(),
+      cursor = vim.api.nvim_win_get_cursor(0),
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
@@ -211,6 +213,8 @@ local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
   local cfg = config.cwd_config()
   local runCommand = {
     command = Command:new({
+      file = file:absolute(),
+      cursor = vim.api.nvim_win_get_cursor(0),
       command = 'cargo',
       manifest_path = cargo_toml:absolute(),
       env = cfg:getEnv(),
