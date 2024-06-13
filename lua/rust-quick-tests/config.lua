@@ -6,7 +6,7 @@ local M = {}
 
 ---@class ConfigState
 ---@field features? string
----@field extra_args? string
+---@field extra_args? table<string>
 ---@field last_cmd? string
 ---@field last_cmd_file? string
 ---@field last_cmd_cursor? number[]
@@ -45,10 +45,7 @@ end
 --- Get the extra args
 ---@return string[]
 function Config:extraArgs()
-  if self.extra_args ~= '' then
-    return vim.split(self.extra_args, ' ')
-  end
-  return {}
+  return self.extra_args or {}
 end
 
 ---@class table<string, Config> | nil
@@ -73,7 +70,7 @@ M.cwd_config = function()
   local cfg = global_config()[vim.fn.getcwd()] or {}
   ---@type ConfigState
   local default_config = {
-    extra_args = '',
+    extra_args = {},
     last_cmd = nil,
     release = false,
     features = '',

@@ -10,6 +10,42 @@ local M = {
   end,
 }
 
+-- Split args, respecting quotes
+local function split_args(input)
+  local args = {}
+  local i = 1
+  local length = #input
+  local quote_char = nil
+  local arg = ''
+
+  while i <= length do
+    local char = input:sub(i, i)
+    if char == '"' or char == '\'' then
+      if quote_char == nil then
+        quote_char = char
+      elseif quote_char == char then
+        quote_char = nil
+      else
+        arg = arg .. char
+      end
+    elseif char == ' ' and quote_char == nil then
+      if #arg > 0 then
+        table.insert(args, arg)
+        arg = ''
+      end
+    else
+      arg = arg .. char
+    end
+    i = i + 1
+  end
+
+  if #arg > 0 then
+    table.insert(args, arg)
+  end
+
+  return args
+end
+
 local function array_to_dic(arr)
   local dic = {}
   for _, pair in ipairs(arr) do
@@ -25,7 +61,7 @@ M.setup = function()
     local cmd = table.remove(opts.fargs, 1)
 
     if cmd == 'args' then
-      local args = table.concat(opts.fargs, ' ')
+      local args = split_args(opts.args or '')
       config.update({ extra_args = args })
     elseif cmd == 'release' then
       config.update({ release = true })
