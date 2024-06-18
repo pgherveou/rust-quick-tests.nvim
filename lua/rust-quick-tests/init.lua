@@ -61,7 +61,7 @@ M.setup = function()
     local cmd = table.remove(opts.fargs, 1)
 
     if cmd == 'args' then
-      local args = split_args(opts.args or '')
+      local args = split_args(table.concat(opts.fargs, ' '))
       config.update({ extra_args = args })
     elseif cmd == 'release' then
       config.update({ release = true })
@@ -74,6 +74,10 @@ M.setup = function()
       config.update({ env = args })
     elseif cmd == 'features' then
       config.update({ features = vim.trim(opts.fargs[1] or '') })
+    elseif cmd == 'vsplit' then
+      config.update({ vertical_split = true })
+    elseif cmd == 'hsplit' then
+      config.update({ vertical_split = false })
     elseif cmd == 'clear' then
       config.clear()
     elseif cmd == 'show' then
@@ -98,7 +102,7 @@ M.setup = function()
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features', 'show' }
+      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features', 'vsplit', 'hsplit', 'show' }
     end,
   })
 end

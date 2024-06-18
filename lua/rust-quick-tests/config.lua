@@ -8,6 +8,7 @@ local M = {}
 ---@field features? string
 ---@field extra_args? table<string>
 ---@field last_cmd? string
+---@field vertical_split? boolean
 ---@field last_cmd_file? string
 ---@field last_cmd_cursor? number[]
 ---@field release? boolean
@@ -40,6 +41,11 @@ end
 --- Get the env flag
 function Config:getEnv()
   return self.env or {}
+end
+
+---
+function Config:verticalSplit()
+  return self.vertical_split
 end
 
 --- Get the extra args

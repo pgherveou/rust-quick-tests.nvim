@@ -5,6 +5,8 @@ local latest_buf_id = nil
 local M = {
   execute_command = function(full_command)
     local ui = require('rust-quick-tests.ui')
+    local config = require('rust-quick-tests.config')
+    local cfg = config.cwd_config()
 
     -- check if a buffer with the latest id is already open, if it is then
     -- delete it and continue
@@ -13,8 +15,12 @@ local M = {
     -- create the new buffer
     latest_buf_id = vim.api.nvim_create_buf(false, true)
 
+    -- vim.api.nvim_set_option_value(latest_buf_id, 'wrap', false)
+    vim.api.nvim_buf_set_option(latest_buf_id, 'wrap', false)
+
     -- split the window to create a new buffer and set it to our window
-    ui.split(latest_buf_id, true)
+    print(cfg:verticalSplit())
+    ui.split(latest_buf_id, cfg:verticalSplit())
 
     -- run the command
     local job_id = vim.fn.termopen(full_command)
