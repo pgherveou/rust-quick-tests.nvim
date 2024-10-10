@@ -254,10 +254,32 @@ local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
   }
 end
 
--- Get the example args if the file is in the examples directory
+-- Get the example args if the file is in the file being tested is an example
+--@param toml table
 --@return table
-local function exampleArgs()
+local function exampleArgs(toml)
   local file_path = vim.fn.expand('%:p')
+  local cargo_toml = get_cargo_toml(Path:new(file_path))
+
+  if cargo_toml == nil then
+    return {}
+  end
+  local root = cargo_toml:parent()
+
+  for _, example in pairs(toml.example) do
+    local example_path = root:joinpath(example.path)
+
+    if file_path == example_path:absolute() then
+      if example['required-features'] then
+        local args = { '--example', example.name, '--features' }
+        for _, feature in ipairs(example['required-features']) do
+          table.insert(args, feature)
+        end
+        return args
+      end
+    end
+  end
+
   -- /examples/<component>/main.rs
   local component = file_path:match('/examples/([^/]+)/[^/]+%.%w+$')
   if component then
@@ -269,6 +291,7 @@ local function exampleArgs()
   if component then
     return { '--example', component }
   end
+
   return {}
 end
 
@@ -276,7 +299,7 @@ end
 --@param toml table
 --@param file string
 local function get_bin_name(toml, file)
-  local example_args = exampleArgs()
+  local example_args = exampleArgs(toml)
   if next(example_args) ~= nil then
     return example_args[2]
   end
@@ -323,7 +346,7 @@ local function make_bin_runnable(bufnr)
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(),
-        exampleArgs(),
+        exampleArgs(toml),
         cfg:extraArgs(),
       },
     }),
@@ -344,7 +367,7 @@ local function make_bin_runnable(bufnr)
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(),
-        exampleArgs(),
+        exampleArgs(toml),
         '--message-format',
         'json',
       },

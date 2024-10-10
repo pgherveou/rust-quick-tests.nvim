@@ -5,6 +5,7 @@
 ---@field parent fun(self: Path): Path
 ---@field make_relative fun(self: Path, dir?: Path): string
 ---@field absolute fun(self: Path): Path
+---@field joinpath fun(self: Path, path: string): Path
 
 ---@class Job
 ---@field result fun(self: Job): table

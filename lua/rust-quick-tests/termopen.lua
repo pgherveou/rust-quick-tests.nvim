@@ -19,7 +19,6 @@ local M = {
     vim.api.nvim_buf_set_option(latest_buf_id, 'wrap', false)
 
     -- split the window to create a new buffer and set it to our window
-    print(cfg:verticalSplit())
     ui.split(latest_buf_id, cfg:verticalSplit())
 
     -- run the command
