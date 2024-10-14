@@ -27,12 +27,23 @@ function Config:releaseFlag()
 end
 
 --- Get the features flag
+-- @param toml table
 ---@return string[]
-function Config:featuresFlag()
+function Config:featuresFlag(toml)
   if self.features == 'all' then
     return { '--all-features' }
   elseif self.features ~= '' then
-    return { '--features', self.features }
+    local all_features = toml.features
+    local features = vim.split(self.features, ',')
+
+    -- filter features that are not in cargo.toml
+    features = vim.tbl_filter(function(feature)
+      return all_features[feature] ~= nil
+    end, features)
+
+    -- add "--features" at the beginning
+    table.insert(features, 1, '--features')
+    return features
   end
 
   return {}

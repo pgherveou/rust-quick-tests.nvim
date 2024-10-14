@@ -131,7 +131,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
         cfg:releaseFlag(),
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:featuresFlag(),
+        cfg:featuresFlag(toml),
         full_test_name,
         '--',
         '--exact',
@@ -154,7 +154,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
         '--message-format=json',
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:featuresFlag(),
+        cfg:featuresFlag(toml),
         full_test_name,
       },
       debug_args = {
@@ -224,7 +224,7 @@ local function make_doc_test_runnable(bufnr, test_name, line, namespace_stack)
         cfg:releaseFlag(),
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:featuresFlag(),
+        cfg:featuresFlag(toml),
         string.format('"%s\\ (line\\ %d)"', full_test_name, line),
         '--',
         '--nocapture',
@@ -266,7 +266,9 @@ local function exampleArgs(toml)
   end
   local root = cargo_toml:parent()
 
-  for _, example in pairs(toml.example) do
+  local examples = toml.example or {}
+
+  for _, example in pairs(examples) do
     local example_path = root:joinpath(example.path)
 
     if file_path == example_path:absolute() then
@@ -345,7 +347,7 @@ local function make_bin_runnable(bufnr)
         cfg:releaseFlag(),
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:featuresFlag(),
+        cfg:featuresFlag(toml),
         exampleArgs(toml),
         cfg:extraArgs(),
       },
@@ -366,7 +368,7 @@ local function make_bin_runnable(bufnr)
         'build',
         '--manifest-path',
         cargo_toml:make_relative(),
-        cfg:featuresFlag(),
+        cfg:featuresFlag(toml),
         exampleArgs(toml),
         '--message-format',
         'json',
