@@ -192,6 +192,10 @@ function M.start(cmd)
         print('Debugging Artifact: ' .. artifact.executable)
         print('Debugging Args: ' .. vim.inspect(args))
 
+        local workspace_root =
+          vim.fn.systemlist('cargo metadata --no-deps --format-version 1 | jq -r .workspace_root')[1]
+        cmd.env['CARGO_WORKSPACE_ROOT_DIR'] = workspace_root
+
         local envs = vim.tbl_extend('keep', cmd.env, environments[cmd.manifest_path] or { NVIM_DEBUG = 'true' })
         local config = {
           args = args,
