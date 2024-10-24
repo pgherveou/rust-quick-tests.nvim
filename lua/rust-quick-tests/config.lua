@@ -43,7 +43,7 @@ function Config:featuresFlag(toml)
 
     -- add "--features" at the beginning
     if #features > 0 then
-      table.insert(features, 1, '--features')
+      return { '--features', table.concat(features, ',') }
     end
 
     return features
