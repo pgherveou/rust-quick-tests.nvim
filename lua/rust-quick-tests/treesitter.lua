@@ -136,6 +136,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
         '--',
         '--exact',
         '--nocapture',
+        '--include-ignored',
       },
     }),
     type = 'run',
@@ -274,9 +275,11 @@ local function exampleArgs(toml)
     if file_path == example_path:absolute() then
       if example['required-features'] then
         local args = { '--example', example.name, '--features' }
+        local features = {}
         for _, feature in ipairs(example['required-features']) do
-          table.insert(args, feature)
+          table.insert(features, feature)
         end
+        table.insert(args, table.concat(features, ','))
         return args
       end
     end
