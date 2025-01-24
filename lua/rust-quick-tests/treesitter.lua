@@ -315,10 +315,10 @@ local function get_bin_name(toml, file)
   end
 
   for _, bin in pairs(bins) do
-    if bin.path == nil then
-      return bin.name
-    elseif file:sub(-#bin.path) == bin.path then
-      return bin.name
+    if bin.path ~= nil then
+      if file:sub(-string.len(bin.path)) == bin.path then
+        return bin.name
+      end
     end
   end
 
@@ -336,6 +336,11 @@ local function make_bin_runnable(bufnr)
   local toml = parse_toml(cargo_toml)
   local bin_name = get_bin_name(toml, file:absolute())
 
+  local bin_args = {}
+  if bin_name then
+    bin_args = { '--bin', bin_name }
+  end
+
   local cfg = config.cwd_config()
 
   local runCommand = {
@@ -351,6 +356,7 @@ local function make_bin_runnable(bufnr)
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(toml),
+        bin_args,
         exampleArgs(toml),
         cfg:extraArgs(),
       },
