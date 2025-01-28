@@ -273,15 +273,15 @@ local function exampleArgs(toml)
     local example_path = root:joinpath(example.path)
 
     if file_path == example_path:absolute() then
+      local args = { '--example', example.name }
       if example['required-features'] then
-        local args = { '--example', example.name, '--features' }
-        local features = {}
+        local features = { '--features' }
         for _, feature in ipairs(example['required-features']) do
           table.insert(features, feature)
         end
         table.insert(args, table.concat(features, ','))
-        return args
       end
+      return args
     end
   end
 
