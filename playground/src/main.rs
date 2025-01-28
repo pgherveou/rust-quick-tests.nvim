@@ -2,7 +2,7 @@ mod bar;
 
 fn main() {
     println!(
-        "Called with args {:?}",
+        "Called main with args {:?}",
         std::env::args().collect::<Vec<_>>()
     );
 

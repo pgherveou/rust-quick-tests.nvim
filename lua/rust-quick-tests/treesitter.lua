@@ -304,11 +304,6 @@ end
 --@param toml table
 --@param file string
 local function get_bin_name(toml, file)
-  local example_args = exampleArgs(toml)
-  if next(example_args) ~= nil then
-    return example_args[2]
-  end
-
   local bins = toml.bin
   if bins == nil then
     return nil
