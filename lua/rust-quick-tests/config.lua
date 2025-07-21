@@ -13,6 +13,7 @@ local M = {}
 ---@field last_cmd_cursor? number[]
 ---@field release? boolean
 ---@field env? table<string, string>
+---@field exact? boolean
 
 ---@class Config: ConfigState
 local Config = {}
@@ -68,6 +69,15 @@ function Config:extraArgs()
   return self.extra_args or {}
 end
 
+--- Get the exact flag
+---@return string[]
+function Config:exactFlag()
+  if self.exact then
+    return { '--exact' }
+  end
+  return {}
+end
+
 ---@class table<string, Config> | nil
 local global_cfg = nil
 
@@ -95,6 +105,7 @@ M.cwd_config = function()
     release = false,
     features = '',
     env = {},
+    exact = true,
   }
   cfg = vim.tbl_deep_extend('force', default_config, cfg)
   return Config:new(cfg)

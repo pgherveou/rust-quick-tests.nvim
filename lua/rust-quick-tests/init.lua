@@ -78,6 +78,10 @@ M.setup = function()
       config.update({ vertical_split = true })
     elseif cmd == 'hsplit' then
       config.update({ vertical_split = false })
+    elseif cmd == 'exact' then
+      config.update({ exact = true })
+    elseif cmd == 'no-exact' then
+      config.update({ exact = false })
     elseif cmd == 'clear' then
       config.clear()
     elseif cmd == 'show' then
@@ -95,14 +99,16 @@ M.setup = function()
   RustQuick env <key=value> - Set environment variable
   RustQuick log <level> - Set RUST_LOG environment variable
   RustQuick features <features> - Set the features flag
-  RUstQuick clear - Clear the current config
+  RustQuick exact - Enable exact test name matching
+  RustQuick no-exact - Disable exact test name matching
+  RustQuick clear - Clear the current config
   RustQuick show - Show the current config
   ]],
     complete = function(_, cmdline)
       if #vim.split(cmdline, ' ') > 2 then
         return {}
       end
-      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features', 'vsplit', 'hsplit', 'show' }
+      return { 'args', 'release', 'dev', 'clear', 'env', 'log', 'features', 'vsplit', 'hsplit', 'exact', 'no-exact', 'show' }
     end,
   })
 end

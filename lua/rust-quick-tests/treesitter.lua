@@ -134,7 +134,7 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
         cfg:featuresFlag(toml),
         full_test_name,
         '--',
-        '--exact',
+        cfg:exactFlag(),
         '--nocapture',
         '--include-ignored',
       },
