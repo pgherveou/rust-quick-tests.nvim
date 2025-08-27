@@ -372,6 +372,8 @@ local function make_bin_runnable(bufnr)
       env = cfg:getEnv(),
       args = {
         'build',
+        '--config',
+        'profile.dev.debug="full"',
         '--manifest-path',
         cargo_toml:make_relative(),
         cfg:featuresFlag(toml),
