@@ -152,6 +152,8 @@ local function make_test_runnable(bufnr, test_name, namespace_stack)
       args = {
         'test',
         '--no-run',
+        '--config',
+        'profile.dev.debug="full"',
         '--message-format=json',
         '--manifest-path',
         cargo_toml:make_relative(),
